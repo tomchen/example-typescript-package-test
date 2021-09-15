@@ -1,0 +1,42 @@
+name: Test package inst
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        node: [12.x, 14.x, 16.x]
+        pkgmgr: [npm, 1.x, berry] # 1.x and berry are yarn
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - name: npm init
+        run: npm init -y
+        if: ${{ matrix.pkgmgr == 'npm' }}
+      - name: npm install
+        run: npm i example-typescript-package
+        if: ${{ matrix.pkgmgr == 'npm' }}
+      - name: yarn init
+        run: yarn init -y
+        if: ${{ matrix.pkgmgr != 'npm' }}
+      - name: set yarn version
+        run: |
+          yarn set version ${{ matrix.yarn }}
+          yarn --version
+        if: ${{ matrix.pkgmgr != 'npm' }}
+      - name: yarn install
+        run: yarn add example-typescript-package
+        if: ${{ matrix.pkgmgr != 'npm' }}
